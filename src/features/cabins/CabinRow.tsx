@@ -1,4 +1,9 @@
 import styled from "styled-components";
+import { formatCurrency } from "../../utils/helpers";
+// const formatCurrency = (value) =>
+//   new Intl.NumberFormat("en", { style: "currency", currency: "USD" }).format(
+//     value,
+//   );
 
 const TableRow = styled.div`
   display: grid;
@@ -38,3 +43,17 @@ const Discount = styled.div`
   font-weight: 500;
   color: var(--color-green-700);
 `;
+
+export function CabinRow({ cabin }) {
+  const { name, maxCapacity, regularPrice, discount, image } = cabin;
+  return (
+    <TableRow role="row">
+      <img src={image} />
+      <Cabin>{name}</Cabin>
+      <div>{maxCapacity} Guests</div>
+      <Price>{formatCurrency(regularPrice)}</Price>
+      <Discount>{discount}</Discount>
+      <button>Delete</button>
+    </TableRow>
+  );
+}
