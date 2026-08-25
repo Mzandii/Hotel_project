@@ -1,6 +1,6 @@
 import { supabase } from "./supabase";
 
-async function getCabins() {
+export async function getCabins() {
   const { data, error } = await supabase.from("cabins").select("*");
 
   if (error) {
@@ -10,4 +10,17 @@ async function getCabins() {
   return data;
 }
 
-export default getCabins;
+export async function deleteCabin({ id }: { id: number | string }) {
+  const numericId = typeof id === "string" ? parseInt(id, 10) : id;
+
+  const { error, data } = await supabase
+    .from("cabins")
+    .delete()
+    .eq("id", numericId);
+
+  if (error) {
+    console.error(error);
+    throw new Error("Cabins could not be deleted");
+  }
+  return data;
+}

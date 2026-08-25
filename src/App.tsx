@@ -9,10 +9,13 @@ import Account from "./pages/Account";
 import Login from "./pages/Login";
 import PageNotFound from "./pages/PageNotFound";
 import AppLayout from "./ui/AppLayout";
+import { ToastContainer } from "react-toastify";
 
 const App = () => {
   return (
     <>
+      <ToastContainer />
+
       <GlobalStyles />
       <BrowserRouter>
         <Routes>
