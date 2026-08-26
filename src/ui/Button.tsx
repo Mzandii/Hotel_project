@@ -1,5 +1,9 @@
 import styled, { css } from "styled-components";
 
+// ============================================
+// STYLES
+// ============================================
+
 const sizes = {
   small: css`
     font-size: 1.2rem;
@@ -48,34 +52,39 @@ const variations = {
   `,
 };
 
-const Button = styled.button<{ $primary?: boolean }>`
-  font-size: 16px;
-  padding: 12px 24px;
-  border: 2px solid;
-  border-radius: var(--border-radius-md);
-  cursor: pointer;
+// ============================================
+// TYPES
+// ============================================
+
+type ButtonProps = {
+  variation?: "primary" | "secondary" | "danger";
+  size?: "small" | "medium" | "large";
+  $primary?: boolean; // Kept for backward compatibility if needed
+};
+
+// ============================================
+// COMPONENT
+// ============================================
+
+const Button = styled.button<ButtonProps>`
+  border: none;
+  border-radius: var(--border-radius-sm);
   box-shadow: var(--shadow-sm);
-  ${(props) =>
-    props.$primary
-      ? css`
-          background-color: blue;
-          border-color: blue;
-          color: white;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
 
-          &:hover {
-            background-color: var(transition);
-            border-color: darkblue;
-          }
-        `
-      : css`
-          background-color: var(--color-brand-600);
-          color: var(--color-brand-50);
+  // Apply size styles
+  ${({ size = "medium" }) => sizes[size]}
 
-          &:hover {
-            background-color: var(--color-brand-900);
-            border-color: darkred;
-          }
-        `}
+  // Apply variation styles
+  ${({ variation = "primary" }) => variations[variation]}
+
+  // Disabled state
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 `;
 
 export default Button;

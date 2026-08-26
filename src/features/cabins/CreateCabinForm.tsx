@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-import Input from "../../ui/Input";
+import Input from "../../ui/input";
 import Form from "../../ui/Form";
 import Button from "../../ui/Button";
 import FileInput from "../../ui/FileInput";
@@ -67,7 +67,7 @@ function CreateCabinForm() {
 
       <FormRow>
         <Label htmlFor="description">Description for website</Label>
-        <Textarea type="number" id="description" defaultValue="" />
+        <Textarea id="description" defaultValue="" />
       </FormRow>
 
       <FormRow>
