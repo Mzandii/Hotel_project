@@ -43,14 +43,12 @@ export default function CabinTable() {
     queryFn: getCabins,
   });
 
-  console.log(data);
-
   if (isLoading) return <Spinner />;
 
   return (
     <Table role="table">
       <TableHeader role="row">
-        <div></div>
+        <div>image</div>
         <div>Cabin</div>
         <div>Capacity</div>
         <div>Price</div>

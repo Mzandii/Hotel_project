@@ -9,7 +9,11 @@ import Form from "../../ui/Form";
 import Button from "../../ui/Button";
 import FileInput from "../../ui/FileInput";
 import Textarea from "../../ui/Textarea";
-import { createCabin } from "../../services/apiCabins";
+import {
+  createCabin,
+  createCabinCabinUrlThenImage,
+  uploadCabinImage,
+} from "../../services/apiCabins";
 import { supabase } from "../../services/supabase";
 
 // ============================================
@@ -90,7 +94,8 @@ function CreateCabinForm() {
   const queryClient = useQueryClient();
 
   const { mutate: createCabinMutation, isLoading: isCreating } = useMutation({
-    mutationFn: (newCabin: FormData) => createCabin(newCabin),
+    //   mutationFn: (newCabin: FormData) => createCabin(newCabin),
+    mutationFn: createCabinCabinUrlThenImage,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cabins"] });
       toast.success("CABIN CREATED SUCCESSFULLY!", {
@@ -104,46 +109,47 @@ function CreateCabinForm() {
     },
   });
 
-  const onSubmit2: SubmitHandler<z.infer<typeof formSchema>> = async (data) => {
-    console.log(data);
-    try {
-      const file = data.image instanceof FileList ? data.image[0] : data.image;
-      if (!file || !(file instanceof File)) {
-        console.error("No valid file selected");
-        return;
-      }
-      const filePath = `cabins/${file.name}-${Date.now()}`;
-      const { error: uploadError } = await supabase.storage
-        .from("cabin-images")
-        .upload(filePath, file);
-
-      if (uploadError) {
-        console.error("Upload Error:", uploadError.message);
-        return;
-      }
-      const { data: urlData } = supabase.storage
-        .from("cabin-images")
-        .getPublicUrl(filePath);
-
-      createCabinMutation({
-        name: data.name,
-        maxCapacity: data.maxCapacity,
-        regularPrice: data.regularPrice,
-        discount: data.discount,
-        description: data.description,
-        image: urlData.publicUrl,
-      });
-    } catch (error) {
-      console.error("Error in onSubmit:", error);
-    }
-  };
-
-  const onSubmit: SubmitHandler<z.infer<typeof formSchema>> = async (data) => {
+  const onSubmitOneFlow: SubmitHandler<z.infer<typeof formSchema>> = async (
+    data,
+  ) => {
     createCabinMutation(data);
   };
 
+  // const onSubmitOtherVersions: SubmitHandler<z.infer<typeof formSchema>> = async (data) => {
+  //   try {
+  //     const file = data.image instanceof FileList ? data.image[0] : data.image;
+  //     if (!file || !(file instanceof File)) {
+  //       console.error("No valid file selected");
+  //       return;
+  //     }
+  //     const filePath = `${file.name}-${Date.now()}`;
+  //     const { error: uploadError } = await supabase.storage
+  //       .from("cabin-images")
+  //       .upload(filePath, file);
+
+  //     if (uploadError) {
+  //       console.error("Upload Error:", uploadError.message);
+  //       return;
+  //     }
+  //     const { data: urlData } = supabase.storage
+  //       .from("cabin-images")
+  //       .getPublicUrl(filePath);
+
+  //     createCabinMutation({
+  //       ...data,
+  //       image: urlData.publicUrl,
+  //     });
+  //   } catch (error) {
+  //     console.error("Error in onSubmit:", error);
+  //   }
+  // };
+
+  // const onSubmit: SubmitHandler<z.infer<typeof formSchema>> = async (data) => {
+  //   createCabinMutation(data);
+  // };
+
   return (
-    <Form onSubmit={handleSubmit(onSubmit2)}>
+    <Form onSubmit={handleSubmit(onSubmitOneFlow)}>
       <FormRow>
         <Label htmlFor="name">Cabin name</Label>
         <Input type="text" id="name" {...register("name")} />
@@ -192,12 +198,7 @@ function CreateCabinForm() {
       </FormRow>
       <FormRow>
         <Label htmlFor="image">Cabin photo</Label>
-        <FileInput
-          type="file"
-          id="image"
-          accept="image/*"
-          {...register("image")}
-        />
+        <FileInput id="image" accept="image/*" {...register("image")} />
         {errors.image && <Error>{errors.image.message}</Error>}
       </FormRow>
 
