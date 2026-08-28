@@ -1,14 +1,20 @@
 import { useForm, type SubmitHandler } from "react-hook-form";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-
 import styled from "styled-components";
-
 import Input from "../../ui/input";
 import Form from "../../ui/Form";
 import Button from "../../ui/Button";
 import FileInput from "../../ui/FileInput";
 import Textarea from "../../ui/Textarea";
+import { createCabin } from "../../services/apiCabins";
+import { supabase } from "../../services/supabase";
+
+// ============================================
+// SCHEMA
+// ============================================
 
 const formSchema = z
   .object({
@@ -17,14 +23,18 @@ const formSchema = z
     regularPrice: z.number().min(0, "Price cannot be negative"),
     discount: z.number().min(0, "Discount cannot be negative"),
     description: z.string().optional(),
-    image: z.instanceof(File).optional(),
+    image: z.instanceof(FileList).or(z.string()).optional(),
   })
   .refine((data) => data.discount <= data.regularPrice, {
     message: "Discount cannot be greater than regular price",
     path: ["discount"],
   });
 
-type FormData = z.infer<typeof formSchema>;
+export type FormData = z.infer<typeof formSchema>;
+
+// ============================================
+// STYLES
+// ============================================
 
 const FormRow = styled.div`
   display: grid;
@@ -62,20 +72,78 @@ const Error = styled.span`
   color: var(--color-red-700);
 `;
 
-const onSubmit: SubmitHandler<FormData> = (data) => console.log(data);
+// ============================================
+// COMPONENT
+// ============================================
 
 function CreateCabinForm() {
   const {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm<FormData>({
     mode: "onSubmit",
     resolver: zodResolver(formSchema),
   });
 
+  const queryClient = useQueryClient();
+
+  const { mutate: createCabinMutation, isLoading: isCreating } = useMutation({
+    mutationFn: (newCabin: FormData) => createCabin(newCabin),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cabins"] });
+      toast.success("CABIN CREATED SUCCESSFULLY!", {
+        position: "top-right",
+      });
+      reset();
+    },
+    onError: (error: Error) => {
+      console.error("FAILED TO CREATE CABIN:", error);
+      toast.error(`Error: ${error.message}`);
+    },
+  });
+
+  const onSubmit2: SubmitHandler<z.infer<typeof formSchema>> = async (data) => {
+    console.log(data);
+    try {
+      const file = data.image instanceof FileList ? data.image[0] : data.image;
+      if (!file || !(file instanceof File)) {
+        console.error("No valid file selected");
+        return;
+      }
+      const filePath = `cabins/${file.name}-${Date.now()}`;
+      const { error: uploadError } = await supabase.storage
+        .from("cabin-images")
+        .upload(filePath, file);
+
+      if (uploadError) {
+        console.error("Upload Error:", uploadError.message);
+        return;
+      }
+      const { data: urlData } = supabase.storage
+        .from("cabin-images")
+        .getPublicUrl(filePath);
+
+      createCabinMutation({
+        name: data.name,
+        maxCapacity: data.maxCapacity,
+        regularPrice: data.regularPrice,
+        discount: data.discount,
+        description: data.description,
+        image: urlData.publicUrl,
+      });
+    } catch (error) {
+      console.error("Error in onSubmit:", error);
+    }
+  };
+
+  const onSubmit: SubmitHandler<z.infer<typeof formSchema>> = async (data) => {
+    createCabinMutation(data);
+  };
+
   return (
-    <Form onSubmit={handleSubmit(onSubmit)}>
+    <Form onSubmit={handleSubmit(onSubmit2)}>
       <FormRow>
         <Label htmlFor="name">Cabin name</Label>
         <Input type="text" id="name" {...register("name")} />
@@ -122,7 +190,6 @@ function CreateCabinForm() {
         />
         {errors.description && <Error>{errors.description.message}</Error>}
       </FormRow>
-
       <FormRow>
         <Label htmlFor="image">Cabin photo</Label>
         <FileInput
@@ -138,10 +205,14 @@ function CreateCabinForm() {
         <Button variation="secondary" type="reset">
           Cancel
         </Button>
-        <Button>Add cabin</Button>
+        <Button disabled={isCreating}>
+          {isCreating ? "Adding cabin..." : "Add cabin"}
+        </Button>
       </FormRow>
     </Form>
   );
 }
 
 export default CreateCabinForm;
+
+// upload imge in the form -->
