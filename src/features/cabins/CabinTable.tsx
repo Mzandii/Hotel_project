@@ -38,24 +38,23 @@ export default function CabinTable() {
     queryFn: getCabins,
   });
 
-  const data = useQuery({
-    queryKey: ["cabin"],
-    queryFn: getCabins,
-  });
-
   if (isLoading) return <Spinner />;
+
+  if (error) return <p>Could not load cabins. Please try again.</p>;
+
+  if (!cabins?.length) return <p>No cabins found.</p>;
 
   return (
     <Table role="table">
       <TableHeader role="row">
-        <div>image</div>
+        <div>Image</div>
         <div>Cabin</div>
         <div>Capacity</div>
         <div>Price</div>
         <div>Discount</div>
         <div></div>
       </TableHeader>
-      {cabins?.map((cabin) => (
+      {cabins.map((cabin) => (
         <CabinRow cabin={cabin} key={cabin.id} />
       ))}
     </Table>

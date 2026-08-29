@@ -1,4 +1,4 @@
-import { FormState, useForm, type SubmitHandler } from "react-hook-form";
+import { useForm, type SubmitHandler } from "react-hook-form";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { z } from "zod";
@@ -9,7 +9,12 @@ import Form from "../../ui/Form";
 import Button from "../../ui/Button";
 import FileInput from "../../ui/FileInput";
 import Textarea from "../../ui/Textarea";
-import { createEditCabin } from "../../services/apiCabins";
+import {
+  createCabin,
+  createCabinCabinUrlThenImage,
+  uploadCabinImage,
+} from "../../services/apiCabins";
+import { supabase } from "../../services/supabase";
 
 // ============================================
 // SCHEMA
@@ -17,7 +22,6 @@ import { createEditCabin } from "../../services/apiCabins";
 
 const formSchema = z
   .object({
-    id: z.number().optional(),
     name: z.string().min(1, "Name is required"),
     maxCapacity: z.number().min(1, "Capacity must be at least 1"),
     regularPrice: z.number().min(0, "Price cannot be negative"),
@@ -41,16 +45,21 @@ const FormRow = styled.div`
   align-items: center;
   grid-template-columns: 24rem 1fr 1.2fr;
   gap: 2.4rem;
+
   padding: 1.2rem 0;
+
   &:first-child {
     padding-top: 0;
   }
+
   &:last-child {
     padding-bottom: 0;
   }
+
   &:not(:last-child) {
     border-bottom: 1px solid var(--color-grey-100);
   }
+
   &:has(button) {
     display: flex;
     justify-content: flex-end;
@@ -71,18 +80,7 @@ const Error = styled.span`
 // COMPONENT
 // ============================================
 
-type CreateCabinFormProps = {
-  cabinToEdit?: FormData;
-  onCloseForm?: () => void;
-};
-
-function CreateCabinForm({
-  cabinToEdit = {} as FormData,
-  onCloseForm,
-}: CreateCabinFormProps) {
-  const { id: editId, ...editValues } = cabinToEdit;
-  const isEditSession = Boolean(editId);
-
+function CreateCabinForm() {
   const {
     register,
     handleSubmit,
@@ -91,45 +89,67 @@ function CreateCabinForm({
   } = useForm<FormData>({
     mode: "onSubmit",
     resolver: zodResolver(formSchema),
-    defaultValues: isEditSession ? editValues : {},
   });
 
   const queryClient = useQueryClient();
 
-  const { mutate: submitCabin, isPending: isLoading } = useMutation({
-    mutationFn: ({ id, data }: { id?: number; data: FormData }) =>
-      createEditCabin(id, data),
+  const { mutate: createCabinMutation, isLoading: isCreating } = useMutation({
+    //   mutationFn: (newCabin: FormData) => createCabin(newCabin),
+    mutationFn: createCabinCabinUrlThenImage,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cabins"] });
-      toast.success(
-        isEditSession
-          ? "CABIN EDITED SUCCESSFULLY!"
-          : "CABIN CREATED SUCCESSFULLY!",
-        { position: "top-right" },
-      );
+      toast.success("CABIN CREATED SUCCESSFULLY!", {
+        position: "top-right",
+      });
       reset();
-      onCloseForm?.();
     },
     onError: (error: Error) => {
-      console.error("FAILED TO SAVE CABIN:", error);
+      console.error("FAILED TO CREATE CABIN:", error);
       toast.error(`Error: ${error.message}`);
     },
   });
 
-  const onSubmit: SubmitHandler<z.infer<typeof formSchema>> = (data) => {
-    // Fall back to the existing image if no new file was chosen
-    const hasNewFile = data.image instanceof FileList && data.image.length > 0;
-
-    const payload: FormData = {
-      ...data,
-      image: hasNewFile ? data.image : cabinToEdit.image,
-    };
-
-    submitCabin({ id: editId, data: payload });
+  const onSubmitOneFlow: SubmitHandler<z.infer<typeof formSchema>> = async (
+    data,
+  ) => {
+    createCabinMutation(data);
   };
 
+  // const onSubmitOtherVersions: SubmitHandler<z.infer<typeof formSchema>> = async (data) => {
+  //   try {
+  //     const file = data.image instanceof FileList ? data.image[0] : data.image;
+  //     if (!file || !(file instanceof File)) {
+  //       console.error("No valid file selected");
+  //       return;
+  //     }
+  //     const filePath = `${file.name}-${Date.now()}`;
+  //     const { error: uploadError } = await supabase.storage
+  //       .from("cabin-images")
+  //       .upload(filePath, file);
+
+  //     if (uploadError) {
+  //       console.error("Upload Error:", uploadError.message);
+  //       return;
+  //     }
+  //     const { data: urlData } = supabase.storage
+  //       .from("cabin-images")
+  //       .getPublicUrl(filePath);
+
+  //     createCabinMutation({
+  //       ...data,
+  //       image: urlData.publicUrl,
+  //     });
+  //   } catch (error) {
+  //     console.error("Error in onSubmit:", error);
+  //   }
+  // };
+
+  // const onSubmit: SubmitHandler<z.infer<typeof formSchema>> = async (data) => {
+  //   createCabinMutation(data);
+  // };
+
   return (
-    <Form onSubmit={handleSubmit(onSubmit)}>
+    <Form onSubmit={handleSubmit(onSubmitOneFlow)}>
       <FormRow>
         <Label htmlFor="name">Cabin name</Label>
         <Input type="text" id="name" {...register("name")} />
@@ -176,7 +196,6 @@ function CreateCabinForm({
         />
         {errors.description && <Error>{errors.description.message}</Error>}
       </FormRow>
-
       <FormRow>
         <Label htmlFor="image">Cabin photo</Label>
         <FileInput id="image" accept="image/*" {...register("image")} />
@@ -184,15 +203,11 @@ function CreateCabinForm({
       </FormRow>
 
       <FormRow>
-        <Button
-          variation="secondary"
-          type="reset"
-          onClick={() => onCloseForm?.()}
-        >
+        <Button variation="secondary" type="reset">
           Cancel
         </Button>
-        <Button disabled={isLoading}>
-          {isEditSession ? "Edit cabin" : "Create new cabin"}
+        <Button disabled={isCreating}>
+          {isCreating ? "Adding cabin..." : "Add cabin"}
         </Button>
       </FormRow>
     </Form>
@@ -200,3 +215,5 @@ function CreateCabinForm({
 }
 
 export default CreateCabinForm;
+
+// upload imge in the form -->
