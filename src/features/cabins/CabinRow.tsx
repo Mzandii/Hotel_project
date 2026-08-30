@@ -4,6 +4,9 @@ import "react-toastify/dist/ReactToastify.css";
 import { useState } from "react";
 import CreateCabinForm from "./CreateCabinForm";
 import useDeleteCabinHook from "./useDeleteCabin";
+import { useCreateCabinHook } from "./useCreateCabinForm";
+import { FaTrash, FaCopy } from "react-icons/fa6";
+import { FaEdit } from "react-icons/fa";
 
 const TableRow = styled.div`
   display: grid;
@@ -61,6 +64,7 @@ const ButtonGroup = styled.div`
 export function CabinRow({ cabin }: { cabin: CabinType }) {
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
   const { deleteCabinMutation, isDeleting } = useDeleteCabinHook();
+  const { submitCabin, isLoading } = useCreateCabinHook();
 
   const {
     id: cabinID,
@@ -70,6 +74,18 @@ export function CabinRow({ cabin }: { cabin: CabinType }) {
     discount,
     image,
   } = cabin;
+
+  const data = {
+    name: `coppy of ${name}`,
+    maxCapacity,
+    regularPrice,
+    discount,
+    image,
+  };
+
+  function handleDuplilcateCabin() {
+    submitCabin({ data: data });
+  }
 
   function handleDeleteCabin(id: number) {
     deleteCabinMutation({ id });
@@ -84,14 +100,17 @@ export function CabinRow({ cabin }: { cabin: CabinType }) {
         <Price>{formatCurrency(regularPrice)}</Price>
         {discount > 0 ? <Discount>{discount}</Discount> : <span>&mdash;</span>}
         <ButtonGroup>
+          <button onClick={() => handleDuplilcateCabin()}>
+            <FaCopy />
+          </button>
           <button
             onClick={() => handleDeleteCabin(cabinID)}
             disabled={isDeleting}
           >
-            Delete
+            <FaTrash />
           </button>
           <button onClick={() => setIsEditFormOpen((open) => !open)}>
-            {isEditFormOpen ? "Close" : "Update"}
+            {isEditFormOpen ? "Close" : <FaEdit />}
           </button>
         </ButtonGroup>
       </TableRow>
