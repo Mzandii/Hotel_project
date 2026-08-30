@@ -1,4 +1,4 @@
-import { FormState, useForm, type SubmitHandler } from "react-hook-form";
+import { useForm, type SubmitHandler } from "react-hook-form";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { z } from "zod";
@@ -117,15 +117,7 @@ function CreateCabinForm({
   });
 
   const onSubmit: SubmitHandler<z.infer<typeof formSchema>> = (data) => {
-    // Fall back to the existing image if no new file was chosen
-    const hasNewFile = data.image instanceof FileList && data.image.length > 0;
-
-    const payload: FormData = {
-      ...data,
-      image: hasNewFile ? data.image : cabinToEdit.image,
-    };
-
-    submitCabin({ id: editId, data: payload });
+    submitCabin({ id: editId, data });
   };
 
   return (

@@ -34,8 +34,8 @@ export default function CabinTable() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["cabins"],
     queryFn: getCabins,
+    queryKey: ["cabins"],
   });
 
   if (isLoading) return <Spinner />;
