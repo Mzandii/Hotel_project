@@ -10,6 +10,7 @@ import Button from "../../ui/Button";
 import FileInput from "../../ui/FileInput";
 import Textarea from "../../ui/Textarea";
 import { createEditCabin } from "../../services/apiCabins";
+import { useCreateCabinHook } from "./useCreateCabinForm";
 
 // ============================================
 // SCHEMA
@@ -94,30 +95,41 @@ function CreateCabinForm({
     defaultValues: isEditSession ? editValues : {},
   });
 
-  const queryClient = useQueryClient();
+  // const queryClient = useQueryClient();
 
-  const { mutate: submitCabin, isPending: isLoading } = useMutation({
-    mutationFn: ({ id, data }: { id?: number; data: FormData }) =>
-      createEditCabin(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cabins"] });
-      toast.success(
-        isEditSession
-          ? "CABIN EDITED SUCCESSFULLY!"
-          : "CABIN CREATED SUCCESSFULLY!",
-        { position: "top-right" },
-      );
-      reset();
-      onCloseForm?.();
-    },
-    onError: (error: Error) => {
-      console.error("FAILED TO SAVE CABIN:", error);
-      toast.error(`Error: ${error.message}`);
-    },
-  });
+  // const { mutate: submitCabin, isPending: isLoading } = useMutation({
+  //   mutationFn: ({ id, data }: { id?: number; data: FormData }) =>
+  //     createEditCabin(id, data),
+  //   onSuccess: () => {
+  //     queryClient.invalidateQueries({ queryKey: ["cabins"] });
+  //     toast.success(
+  //       isEditSession
+  //         ? "CABIN EDITED SUCCESSFULLY!"
+  //         : "CABIN CREATED SUCCESSFULLY!",
+  //       { position: "top-right" },
+  //     );
+  //     reset();
+  //     onCloseForm?.();
+  //   },
+  //   onError: (error: Error) => {
+  //     console.error("FAILED TO SAVE CABIN:", error);
+  //     toast.error(`Error: ${error.message}`);
+  //   },
+  // });
+
+  const { submitCabin, isLoading } = useCreateCabinHook(isEditSession);
 
   const onSubmit: SubmitHandler<z.infer<typeof formSchema>> = (data) => {
-    submitCabin({ id: editId, data });
+    submitCabin(
+      { id: editId, data },
+      {
+        onSuccess: (data) => {
+          console.log("DATA", data);
+          reset();
+          onCloseForm?.();
+        },
+      },
+    );
   };
 
   return (
