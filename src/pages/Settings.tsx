@@ -1,7 +1,18 @@
 import Heading from "../ui/Heading";
+import Row from "../ui/Row";
+import SettingTable from "../features/settings/SettingTable";
 
 function Settings() {
-  return <Heading as="h1">Update hotel settings</Heading>;
+  return (
+    <>
+      <Row type="horizontal">
+        <Heading as="h1">Update hotel settings</Heading>
+      </Row>
+      <Row>
+        <SettingTable /> {/* ✅ Shows the single settings row */}
+      </Row>
+    </>
+  );
 }
 
 export default Settings;
