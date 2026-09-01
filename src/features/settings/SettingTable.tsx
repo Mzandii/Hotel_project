@@ -1,8 +1,7 @@
 import styled from "styled-components";
 import Spinner from "../../ui/Spinner";
-import { SettingRow } from "./SettingRow";
-import { getSettings } from "../../services/apiSettings";
-import { useQuery } from "@tanstack/react-query";
+import useSettings from "./useSetting";
+import UpdateSettingsForm from "./UpdateSettingsForm";
 
 const Table = styled.div`
   border: 1px solid var(--color-grey-200);
@@ -27,25 +26,14 @@ const TableHeader = styled.header`
 `;
 
 export default function SettingTable() {
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["settings"],
-    queryFn: getSettings,
-  });
-
+  const { data: settingsData, isLoading, error } = useSettings();
   if (isLoading) return <Spinner />;
   if (error) return <p>Could not load settings. Please try again.</p>;
-  if (!data) return <p>No settings found.</p>;
+  if (!settingsData) return <p>No settings found.</p>;
 
   return (
     <Table role="table">
-      <TableHeader role="row">
-        <div>Minimum nights</div>
-        <div>Maximum nights</div>
-        <div>Maximum guests</div>
-        <div>Breakfast price</div>
-        <div>Actions</div>
-      </TableHeader>
-      <SettingRow settingData={data} />
+      <UpdateSettingsForm settings={settingsData} />
     </Table>
   );
 }

@@ -9,7 +9,7 @@ function Settings() {
         <Heading as="h1">Update hotel settings</Heading>
       </Row>
       <Row>
-        <SettingTable /> {/* ✅ Shows the single settings row */}
+        <SettingTable />
       </Row>
     </>
   );

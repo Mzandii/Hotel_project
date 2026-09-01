@@ -1,15 +1,18 @@
 import Form from "../../ui/Form";
 import styled from "styled-components";
 import Input from "../../ui/input";
-import { getSettings, updateSetting } from "../../services/apiSettings";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
-import Spinner from "../../ui/Spinner";
 import { toast } from "react-toastify";
+import useUpdate from "./useUpdateSetting";
+
+// ============================================
+// STYLES
+// ============================================
 
 const StyledFormRow = styled.div`
   display: grid;
-  grid-template-columns: 0.6fr 1.8fr 2.2fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr 2fr; // ✅ Changed to 2 columns: label | input
   column-gap: 2.4rem;
   align-items: center;
   padding: 1.4rem 2.4rem;
@@ -18,11 +21,33 @@ const StyledFormRow = styled.div`
     border-bottom: 1px solid var(--color-grey-100);
   }
 `;
+
 const Label = styled.label`
   font-weight: 500;
-  /* Add your label styles here */
 `;
-const FormRow = ({ label, children }) => {
+
+// ============================================
+// TYPES
+// ============================================
+
+type SettingType = {
+  id: number;
+  minBookingLength: number;
+  maxBookingLength: number;
+  maxGuestsPerBooking: number;
+  breakfastPrice: number;
+};
+
+type FormRowProps = {
+  label: string;
+  children: React.ReactElement;
+};
+
+// ============================================
+// FORM ROW COMPONENT
+// ============================================
+
+function FormRow({ label, children }: FormRowProps) {
   const id = children.props.id;
 
   return (
@@ -31,29 +56,18 @@ const FormRow = ({ label, children }) => {
       {children}
     </StyledFormRow>
   );
-};
+}
 
-//====================================
-//Get the data from the api
-//====================================
+// ============================================
+// MAIN COMPONENT
+// ============================================
 
-//====================================
-//give the data to the form and manipulate
-//====================================
-export default function UpdateSettingsForm({ settings }) {
-  const queryClient = useQueryClient();
-  const { mutate: mutation, dataR } = useMutation({
-    mutationFn: (data) => updateSetting(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["settings"] });
-      toast.success("seeting updates");
-    },
-    onError: (error) => {
-      console.log(error);
-      toast.error("could not change the setting");
-    },
-  });
-
+export default function UpdateSettingsForm({
+  settings,
+}: {
+  settings: SettingType;
+}) {
+  const { mutate: mutation, isPending } = useUpdate();
   const {
     register,
     handleSubmit,
@@ -67,29 +81,60 @@ export default function UpdateSettingsForm({ settings }) {
     },
   });
 
-  function onSubmit(formData) {
+  function onSubmit(formData: Partial<SettingType>) {
     mutation(formData);
+  }
+
+  function handleUpdate(
+    e: React.FocusEvent<HTMLInputElement>,
+    field: keyof SettingType,
+  ) {
+    const value = e.target.value;
+    const parsedValue = value === "" ? "" : Number(value);
+    mutation({ [field]: parsedValue });
   }
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
       <FormRow label="Minimum nights/booking">
-        <Input type="number" {...register("minBookingLength")} />
+        <Input
+          type="number"
+          id="minBookingLength"
+          {...register("minBookingLength")}
+          disabled={isPending}
+          onBlur={(e) => handleUpdate(e, "minBookingLength")}
+        />
       </FormRow>
+
       <FormRow label="Maximum nights/booking">
-        <Input type="number" {...register("maxBookingLength")} />
+        <Input
+          type="number"
+          id="maxBookingLength"
+          {...register("maxBookingLength")}
+          disabled={isPending}
+          onBlur={(e) => handleUpdate(e, "maxBookingLength")}
+        />
       </FormRow>
+
       <FormRow label="Maximum guests/booking">
-        <Input type="number" {...register("maxGuestsPerBooking")} />
+        <Input
+          type="number"
+          id="maxGuestsPerBooking"
+          {...register("maxGuestsPerBooking")}
+          disabled={isPending}
+          onBlur={(e) => handleUpdate(e, "maxGuestsPerBooking")}
+        />
       </FormRow>
+
       <FormRow label="Breakfast price">
         <Input
           type="number"
-          id="breakfast-price"
+          id="breakfastPrice"
           {...register("breakfastPrice")}
+          disabled={isPending}
+          onBlur={(e) => handleUpdate(e, "breakfastPrice")}
         />
       </FormRow>
-      <button type="submit">submit</button>
     </Form>
   );
 }
