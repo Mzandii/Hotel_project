@@ -15,11 +15,10 @@ const App = () => {
   return (
     <>
       <ToastContainer />
-
       <GlobalStyles />
       <BrowserRouter>
         <Routes>
-          <Route element={<AppLayout />}>
+          <Route path="/" element={<AppLayout />}>
             <Route index element={<Navigate replace to="dashboard" />} />
             <Route path="Users" element={<Users />} />
             <Route path="Account" element={<Account />} />

@@ -1,6 +1,4 @@
 import { useForm, type SubmitHandler } from "react-hook-form";
-import { useQueryClient, useMutation } from "@tanstack/react-query";
-import { toast } from "react-toastify";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import styled from "styled-components";
@@ -9,7 +7,6 @@ import Form from "../../ui/Form";
 import Button from "../../ui/Button";
 import FileInput from "../../ui/FileInput";
 import Textarea from "../../ui/Textarea";
-import { createEditCabin } from "../../services/apiCabins";
 import { useCreateCabinHook } from "./useCreateCabinForm";
 
 // ============================================
@@ -117,7 +114,7 @@ function CreateCabinForm({
   //   },
   // });
 
-  const { submitCabin, isLoading } = useCreateCabinHook(isEditSession);
+  const { submitCabin, isLoading } = useCreateCabinHook();
 
   const onSubmit: SubmitHandler<z.infer<typeof formSchema>> = (data) => {
     submitCabin(
@@ -133,7 +130,10 @@ function CreateCabinForm({
   };
 
   return (
-    <Form onSubmit={handleSubmit(onSubmit)}>
+    <Form
+      $type={onCloseForm ? "modal" : "regular"}
+      onSubmit={handleSubmit(onSubmit)}
+    >
       <FormRow>
         <Label htmlFor="name">Cabin name</Label>
         <Input type="text" id="name" {...register("name")} />
