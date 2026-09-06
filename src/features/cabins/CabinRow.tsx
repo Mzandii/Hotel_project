@@ -64,7 +64,7 @@ const ButtonGroup = styled.div`
 export function CabinRow({ cabin }: { cabin: CabinType }) {
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
   const { deleteCabinMutation, isDeleting } = useDeleteCabinHook();
-  const { submitCabin, isLoading } = useCreateCabinHook();
+  const { submitCabin } = useCreateCabinHook();
 
   const {
     id: cabinID,

@@ -8,7 +8,7 @@ import App from "./App";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 300 * 1000,
+      staleTime: 3600 * 1000,
     },
   },
 });
@@ -16,7 +16,7 @@ const queryClient = new QueryClient({
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <ReactQueryDevtools initialIsOpen={false} />
+      <ReactQueryDevtools initialIsOpen={true} />
       <App />
     </QueryClientProvider>
   </StrictMode>,
