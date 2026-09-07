@@ -6,9 +6,13 @@ import {
   createContext,
   useContext,
   useState,
-  ReactNode,
-  ReactElement,
+  type ReactNode,
+  type ReactElement,
+  useEffect,
+  useRef,
+  isValidElement,
 } from "react";
+import useCloseOnClick from "../hooks/useCloseOnClick";
 
 const StyledModal = styled.div`
   position: fixed;
@@ -106,15 +110,21 @@ function Window({ children, name }: WindowProps) {
   }
   const { close, openName } = context;
 
+  const ref = useCloseOnClick({ close });
+
   if (name !== openName) return null;
 
   return createPortal(
     <Overlay>
-      <StyledModal>
+      <StyledModal ref={ref}>
         <CloseButton onClick={close}>
           <HiXMark />
         </CloseButton>
-        <div>{cloneElement(children, { onCloseForm: close })}</div>
+        <div>
+          {isValidElement(children)
+            ? cloneElement(children, { onCloseForm: close } as any)
+            : children}
+        </div>{" "}
       </StyledModal>
     </Overlay>,
     document.body,

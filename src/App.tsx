@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router";
 import GlobalStyles from "./styles/GlobalStyles";
 import Dashboard from "./pages/Dashboard";
 import Bookings from "./pages/Bookings";
