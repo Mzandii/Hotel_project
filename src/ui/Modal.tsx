@@ -8,8 +8,6 @@ import {
   useState,
   type ReactNode,
   type ReactElement,
-  useEffect,
-  useRef,
   isValidElement,
 } from "react";
 import useCloseOnClick from "../hooks/useCloseOnClick";

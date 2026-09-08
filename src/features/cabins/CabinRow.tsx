@@ -10,18 +10,19 @@ import { FaEdit } from "react-icons/fa";
 import Modal from "../../ui/Modal";
 import Button from "../../ui/Button";
 import ConfirmDelete from "../../ui/ConfirmDelete";
+import Table from "../../ui/Table";
 
-const TableRow = styled.div`
-  display: grid;
-  grid-template-columns: 0.6fr 1.8fr 2.2fr 1fr 1fr 1fr;
-  column-gap: 2.4rem;
-  align-items: center;
-  padding: 1.4rem 2.4rem;
+// const TableRow = styled.div`
+//   display: grid;
+//   grid-template-columns: 0.6fr 1.8fr 2.2fr 1fr 1fr 1fr;
+//   column-gap: 2.4rem;
+//   align-items: center;
+//   padding: 1.4rem 2.4rem;
 
-  &:not(:last-child) {
-    border-bottom: 1px solid var(--color-grey-100);
-  }
-`;
+//   &:not(:last-child) {
+//     border-bottom: 1px solid var(--color-grey-100);
+//   }
+// `;
 
 const Img = styled.img`
   display: block;
@@ -95,7 +96,7 @@ export function CabinRow({ cabin }: { cabin: CabinType }) {
   }
 
   return (
-    <TableRow role="row">
+    <Table.Row>
       <Img src={image} alt={name} />
       <Cabin>{name}</Cabin>
       <div>{maxCapacity} Guests</div>
@@ -129,6 +130,6 @@ export function CabinRow({ cabin }: { cabin: CabinType }) {
           </Modal.Window>
         </Modal>
       </ButtonGroup>
-    </TableRow>
+    </Table.Row>
   );
 }
