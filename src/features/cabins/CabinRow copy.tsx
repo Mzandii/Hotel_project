@@ -109,25 +109,15 @@ export function CabinRow({ cabin }: { cabin: CabinType }) {
       <Price>{formatCurrency(regularPrice)}</Price>
       {discount > 0 ? <Discount>{discount}</Discount> : <span>&mdash;</span>}
       <ButtonGroup>
+        <button onClick={() => handleDuplilcateCabin()}>
+          <FaCopy />
+        </button>
         <Modal>
-          <Menus.Menu>
-            <Menus.Toggle id={cabinID} />
-            <Menus.List id={cabinID}>
-              <Menus.Button
-                icon={<HiSquare2Stack />}
-                onClick={handleDuplilcateCabin}
-              >
-                Duplicate
-              </Menus.Button>
-              <Modal.Open opens="edit">
-                <Menus.Button icon={<FaEdit />}>Edit</Menus.Button>
-              </Modal.Open>
-              <Modal.Open opens="delete">
-                <Menus.Button icon={<FaTrash />}>Delete</Menus.Button>
-              </Modal.Open>
-            </Menus.List>
-          </Menus.Menu>
-
+          <Modal.Open opens="delete">
+            <button>
+              <FaTrash />
+            </button>
+          </Modal.Open>
           <Modal.Window name="delete">
             <ConfirmDelete
               resourceName={name}
@@ -136,10 +126,23 @@ export function CabinRow({ cabin }: { cabin: CabinType }) {
             />
           </Modal.Window>
 
+          <Modal.Open opens="edit">
+            <button>
+              <FaEdit />
+            </button>
+          </Modal.Open>
           <Modal.Window name="edit">
             <CreateCabinForm cabinToEdit={cabin} />
           </Modal.Window>
         </Modal>
+        <Menus.Menu>
+          <Menus.Toggle id={cabinID} />
+          <Menus.List id={cabinID}>
+            <Menus.Button icon={<HiSquare2Stack />}>Duplicate</Menus.Button>
+            <Menus.Button icon={<FaEdit />}>Edit</Menus.Button>
+            <Menus.Button icon={<FaTrash />}>Delete</Menus.Button>
+          </Menus.List>
+        </Menus.Menu>
       </ButtonGroup>
     </Table.Row>
   );
