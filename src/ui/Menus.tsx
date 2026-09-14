@@ -1,4 +1,11 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  type ReactNode,
+  type MouseEvent,
+  type RefObject,
+} from "react";
 import { createPortal } from "react-dom";
 import { HiEllipsisVertical } from "react-icons/hi2";
 import styled from "styled-components";
@@ -40,6 +47,7 @@ type ButtonProps = {
   onClick?: () => void;
 };
 
+// Only the props you actually pass through styled-components
 type StyledListProps = {
   position: Position;
 };
@@ -147,8 +155,9 @@ const Menus = ({ children }: MenusProps) => {
 function Toggle({ id }: ToggleProps) {
   const { openId, open, close, setPosition } = useMenusContext();
 
-  function handleClick(e: React.MouseEvent<HTMLButtonElement>) {
+  function handleClick(e: MouseEvent<HTMLButtonElement>) {
     const rect = e.currentTarget.getBoundingClientRect();
+
     setPosition({
       x: window.innerWidth - rect.width - rect.x,
       y: rect.y + rect.height + 8,
@@ -166,8 +175,6 @@ function Toggle({ id }: ToggleProps) {
 
 function List({ id, children }: ListProps) {
   const { openId, position, close } = useMenusContext();
-
-  // ✅ Use the hook correctly
   const ref = useCloseOnClick({ close, listenCapturing: true });
 
   if (openId !== id) return null;
@@ -188,7 +195,6 @@ function Button({ children, icon, onClick }: ButtonProps) {
     onClick?.();
     close();
   }
-
   return (
     <li>
       <StyledButton onClick={handleClick}>

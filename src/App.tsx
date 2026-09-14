@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router";
+import { ToastContainer } from "react-toastify";
 import GlobalStyles from "./styles/GlobalStyles";
 import Dashboard from "./pages/Dashboard";
 import Bookings from "./pages/Bookings";
@@ -9,9 +10,8 @@ import Account from "./pages/Account";
 import Login from "./pages/Login";
 import PageNotFound from "./pages/PageNotFound";
 import AppLayout from "./ui/AppLayout";
-import { ToastContainer } from "react-toastify";
 
-const App = () => {
+export default function App() {
   return (
     <>
       <ToastContainer />
@@ -33,6 +33,4 @@ const App = () => {
       </BrowserRouter>
     </>
   );
-};
-
-export default App;
+}

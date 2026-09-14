@@ -119,7 +119,6 @@ function Table({ columns, children }: TableProps) {
 
 function Header({ children }: HeaderProps) {
   const { columns } = useTableContext();
-
   return (
     <StyledHeader role="row" columns={columns} as="header">
       {children}
@@ -129,7 +128,6 @@ function Header({ children }: HeaderProps) {
 
 function Row({ children }: RowProps) {
   const { columns } = useTableContext();
-
   return (
     <StyledRow role="row" columns={columns}>
       {children}
@@ -158,8 +156,8 @@ function FooterComponent({ children }: FooterProps) {
 // ============================================
 
 Table.Header = Header;
-Table.Row = Row;
 Table.Body = Body;
+Table.Row = Row;
 Table.Footer = FooterComponent;
 
 export default Table;
