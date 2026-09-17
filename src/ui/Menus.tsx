@@ -4,7 +4,6 @@ import {
   useState,
   type ReactNode,
   type MouseEvent,
-  type RefObject,
 } from "react";
 import { createPortal } from "react-dom";
 import { HiEllipsisVertical } from "react-icons/hi2";
