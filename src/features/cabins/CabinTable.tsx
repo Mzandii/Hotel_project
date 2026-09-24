@@ -12,18 +12,31 @@ export default function CabinTable() {
   if (error) return <p>Could not load cabins. Please try again.</p>;
   if (!cabins?.length) return <p>No cabins found.</p>;
 
+  // 1. Filter
   const filterValue = searchParams.get("discount") || "all";
 
-  let filteredCabins: typeof cabins;
-  if (filterValue === "all") {
-    filteredCabins = cabins;
-  } else if (filterValue === "with-discount") {
+  let filteredCabins = cabins;
+
+  if (filterValue === "with-discount") {
     filteredCabins = cabins.filter((el) => el.discount > 0);
   } else if (filterValue === "no-discount") {
     filteredCabins = cabins.filter((el) => el.discount === 0);
-  } else {
-    filteredCabins = cabins;
   }
+
+  // 2. Sort
+  const sortValue = searchParams.get("sortBy") || "startDate-asc";
+  const [field, direction] = sortValue.split("-");
+  const modifier = direction === "asc" ? 1 : -1;
+
+  const sortedCabins = [...filteredCabins].sort((a, b) => {
+    const aVal = a[field as keyof typeof a];
+    const bVal = b[field as keyof typeof b];
+
+    if (typeof aVal === "number" && typeof bVal === "number") {
+      return (aVal - bVal) * modifier;
+    }
+    return String(aVal).localeCompare(String(bVal)) * modifier;
+  });
 
   return (
     <Table columns="1fr 1.8fr 2.2fr 1fr 1fr 1fr">
@@ -36,7 +49,7 @@ export default function CabinTable() {
         <div></div>
       </Table.Header>
       <Table.Body
-        data={filteredCabins!}
+        data={sortedCabins}
         render={(cabin) => <CabinRow cabin={cabin} key={cabin.id} />}
       />
     </Table>
