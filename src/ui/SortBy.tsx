@@ -1,20 +1,19 @@
 import { useSearchParams } from "react-router";
 import Select from "./Select";
 
-type Option = {
+export type FilterOption = {
   value: string;
   label: string;
 };
-export type Options = Option[];
-type SortByProps = {
-  options: Options;
+
+type FilterProps = {
+  filterField: string;
+  options: FilterOption[];
+  defaultValue?: string;
 };
 
-function SortBy({ options }: SortByProps) {
+function SortBy({ filterField, defaultValue, options }: FilterProps) {
   const [searchParams, setSearchParams] = useSearchParams();
-  const filterField = "sortBy";
-  const defaultValue = "";
-
   const currentValue = searchParams.get(filterField) || defaultValue;
 
   function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {

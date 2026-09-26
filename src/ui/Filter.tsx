@@ -46,7 +46,7 @@ type FilterProps = {
   defaultValue?: string;
 };
 
-const Filter = ({ filterField, options, defaultValue }: FilterProps) => {
+const Filter = ({ filterField, defaultValue, options }: FilterProps) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const currentFilter = searchParams.get(filterField) || defaultValue;
 

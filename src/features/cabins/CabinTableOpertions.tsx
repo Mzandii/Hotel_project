@@ -15,6 +15,8 @@ export default function CabinTableOperations() {
         ]}
       />
       <SortBy
+        filterField="sortBy"
+        defaultValue=""
         options={[
           { value: "name-asc", label: "Sort By Name (A-Z)" },
           { value: "name-dec", label: "Sort By Name (Z-A)" },
